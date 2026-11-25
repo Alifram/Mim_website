@@ -96,9 +96,9 @@ const navigationByRole: Record<string, PortalNavItem[]> = {
   guru: [
     dashboardItem,
     {
-      title: 'Akademik guru',
-      description: 'Kelola kegiatan akademik dan nilai.',
-      href: '/academics/teaching-assignments',
+      title: 'Input Nilai',
+      description: 'Masukkan nilai rapor siswa sesuai penugasan.',
+      href: '/academics/grades',
       icon: BookOpen,
     },
     {
@@ -148,18 +148,11 @@ const navigationByRole: Record<string, PortalNavItem[]> = {
   orang_tua: [
     dashboardItem,
     {
-      title: 'Rapor siswa',
-      description: 'Lihat perkembangan belajar anak.',
-      href: '/academics/report-cards',
-      icon: BookOpen,
-    },
-    {
-      title: 'Pembayaran',
-      description: 'Lihat informasi pembayaran sekolah.',
+      title: 'Infaq & Wakaf',
+      description: 'Pantau transaksi Infaq dan Wakaf anak.',
       href: '/payments',
       icon: CreditCard,
     },
-    informationItem,
     profileItem,
   ],
   petugas_keuangan: [
@@ -192,7 +185,7 @@ const pageTitles: Record<string, string> = {
   '/academics/teaching-assignments': 'Penugasan Mapel',
   '/academics/schedules': 'Jadwal pelajaran',
   '/academics/report-cards': 'Rapor siswa',
-  '/academics/grades': 'Nilai akademik',
+  '/academics/grades': 'Input Nilai',
   '/academics/subjects': 'Mata pelajaran',
   '/events': 'Informasi & kegiatan',
   '/payments': 'Pembayaran',

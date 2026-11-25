@@ -32,3 +32,73 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  [data-student-report-document],
+  [data-student-report-document] * {
+    visibility: visible !important;
+  }
+
+  [data-student-report-document] {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  [data-student-report-controls] {
+    display: none !important;
+  }
+
+  .student-report-group {
+    break-inside: avoid;
+    border-color: #999 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .student-report-mobile {
+    display: none !important;
+  }
+
+  .student-report-table-wrapper {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .student-report-table {
+    display: table !important;
+  }
+
+  .student-report-table th,
+  .student-report-table td {
+    border-color: #999 !important;
+    color: #111 !important;
+  }
+
+  .student-report-table thead {
+    display: table-header-group;
+  }
+
+  .student-report-score {
+    border-color: #999 !important;
+    background: #fff !important;
+  }
+
+  .student-report-card *,
+  .student-report-score * {
+    color: #111 !important;
+  }
+}
