@@ -18,7 +18,9 @@ export const getCurrentProfile = cache(async function getCurrentProfile() {
 
   const { data: profile, error: profileError } = await supabase
     .from('users')
-    .select('nama_lengkap, nomor_induk, role, kelas_id')
+    .select(
+      'id, nama_lengkap, nomor_induk, email, role, kelas_id, jenis_guru, tahun_angkatan',
+    )
     .eq('auth_user_id', user.id)
     .eq('is_deleted', 0)
     .maybeSingle()
