@@ -6,6 +6,10 @@ type IdentifierSession = {
   message?: unknown
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 export async function signIn(identifier: string, password: string) {
   const normalizedIdentifier = identifier.trim()
   if (!normalizedIdentifier || !password) {
@@ -21,6 +25,20 @@ export async function signIn(identifier: string, password: string) {
     })
 
     if (error) {
+      const authErrorMessage = error.message.toLowerCase()
+      const authErrorCode = 'code' in error && typeof error.code === 'string'
+        ? error.code.toLowerCase()
+        : ''
+      if (
+        authErrorCode.includes('banned') ||
+        authErrorMessage.includes('banned') ||
+        authErrorMessage.includes('user is disabled') ||
+        authErrorMessage.includes('user disabled')
+      ) {
+        throw new Error(
+          'Akun Anda dinonaktifkan. Hubungi admin sekolah untuk bantuan.',
+        )
+      }
       throw new Error(
         'Login gagal. Periksa nomor induk atau email dan kata sandi Anda.',
       )
@@ -39,10 +57,23 @@ export async function signIn(identifier: string, password: string) {
       typeof session?.access_token !== 'string' ||
       typeof session.refresh_token !== 'string'
     ) {
+      let message = typeof session?.message === 'string'
+        ? session.message
+        : null
+      if (error && 'context' in error && error.context instanceof Response) {
+        try {
+          const responseBody: unknown = await error.context.clone().json()
+          if (isRecord(responseBody) && typeof responseBody.message === 'string') {
+            message = responseBody.message
+          }
+        } catch {
+          message = typeof session?.message === 'string'
+            ? session.message
+            : null
+        }
+      }
       throw new Error(
-        typeof session?.message === 'string'
-          ? session.message
-          : 'Login dengan nomor induk gagal. Periksa kembali data Anda.',
+        message ?? 'Login dengan nomor induk gagal. Periksa kembali data Anda.',
       )
     }
 
@@ -70,9 +101,8 @@ export async function signIn(identifier: string, password: string) {
 
   const { data: profile, error: profileError } = await supabase
     .from('users')
-    .select('id, role')
+    .select('id, role, is_deleted')
     .eq('auth_user_id', user.id)
-    .eq('is_deleted', 0)
     .maybeSingle()
 
   if (profileError) {
@@ -83,7 +113,13 @@ export async function signIn(identifier: string, password: string) {
   if (!profile) {
     await supabase.auth.signOut()
     throw new Error(
-      'Profil sekolah Anda tidak aktif. Hubungi administrator sekolah.',
+      'Profil akun Anda belum terhubung. Hubungi admin sekolah untuk bantuan.',
+    )
+  }
+  if (Number(profile.is_deleted) === 1) {
+    await supabase.auth.signOut()
+    throw new Error(
+      'Akun Anda dinonaktifkan. Hubungi admin sekolah untuk bantuan.',
     )
   }
 
