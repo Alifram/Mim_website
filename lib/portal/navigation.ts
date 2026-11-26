@@ -9,6 +9,7 @@ import {
   School,
   UserRound,
   UserPlus,
+  UsersRound,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -48,6 +49,12 @@ const navigationByRole: Record<string, PortalNavItem[]> = {
       description: 'Buat akun baru untuk warga sekolah.',
       href: '/users/new',
       icon: UserPlus,
+    },
+    {
+      title: 'Kelola Akun',
+      description: 'Cari, ubah, dan atur status akun warga sekolah.',
+      href: '/users',
+      icon: UsersRound,
     },
     {
       title: 'Data Kelas',
@@ -177,7 +184,7 @@ const roleLabels: Record<string, string> = {
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Beranda',
-  '/users': 'Pengguna',
+  '/users': 'Kelola Akun',
   '/users/new': 'Registrasi',
   '/classes': 'Kelas',
   '/attendance': 'Presensi',

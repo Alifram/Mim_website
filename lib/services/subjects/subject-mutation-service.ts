@@ -6,6 +6,20 @@ export type AddSubjectResult =
   | { status: 'success'; message: string }
   | { status: 'error'; message: string }
 
+export type SetSubjectActiveResult =
+  | { status: 'success'; message: string }
+  | { status: 'error'; message: string }
+
+function isSuccessResponse(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    'status' in value &&
+    value.status === 'success'
+  )
+}
+
 export async function addSchoolSubject(
   code: string,
   name: string,
@@ -52,6 +66,54 @@ export async function addSchoolSubject(
     return {
       status: 'error',
       message: 'Mata pelajaran belum berhasil disimpan. Periksa koneksi lalu coba lagi.',
+    }
+  }
+}
+
+export async function setSchoolSubjectActive(
+  subjectId: number,
+  active: boolean,
+): Promise<SetSubjectActiveResult> {
+  if (!Number.isSafeInteger(subjectId) || subjectId <= 0) {
+    return { status: 'error', message: 'ID mata pelajaran tidak valid.' }
+  }
+
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.rpc('admin_set_subject_active', {
+      p_subject_id: subjectId,
+      p_active: active,
+    })
+
+    if (error) {
+      return {
+        status: 'error',
+        message:
+          error.code === '42501'
+            ? 'Hanya admin aktif yang dapat mengelola mata pelajaran.'
+            : error.code === 'P0002'
+              ? 'Mata pelajaran tidak ditemukan.'
+              : 'Status mata pelajaran belum berhasil diperbarui. Periksa migrasi dan koneksi.',
+      }
+    }
+
+    if (!isSuccessResponse(data)) {
+      return {
+        status: 'error',
+        message: 'Server tidak mengonfirmasi perubahan mata pelajaran.',
+      }
+    }
+
+    return {
+      status: 'success',
+      message: active
+        ? 'Mata pelajaran berhasil diaktifkan.'
+        : 'Mata pelajaran berhasil dinonaktifkan.',
+    }
+  } catch {
+    return {
+      status: 'error',
+      message: 'Status mata pelajaran belum berhasil diperbarui. Periksa koneksi lalu coba lagi.',
     }
   }
 }

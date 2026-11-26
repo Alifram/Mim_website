@@ -2,10 +2,13 @@
 
 import { useMemo, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, Plus, Search } from 'lucide-react'
+import { BookOpen, Plus, Search, Trash2 } from 'lucide-react'
 
 import type { SchoolSubject } from '@/lib/services/subjects/subject-service'
-import { addSchoolSubject } from '@/lib/services/subjects/subject-mutation-service'
+import {
+  addSchoolSubject,
+  setSchoolSubjectActive,
+} from '@/lib/services/subjects/subject-mutation-service'
 
 type SubjectManagementProps = {
   subjects: SchoolSubject[]
@@ -21,6 +24,7 @@ export default function SubjectManagement({
   const [name, setName] = useState('')
   const [search, setSearch] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [deactivatingId, setDeactivatingId] = useState<number | null>(null)
   const [feedback, setFeedback] = useState<{
     status: 'success' | 'error'
     message: string
@@ -56,6 +60,26 @@ export default function SubjectManagement({
     }
   }
 
+  async function handleDeactivate(subject: SchoolSubject) {
+    if (
+      !window.confirm(
+        `Nonaktifkan mata pelajaran "${subject.nama}"? Riwayat dan penugasan yang ada akan tetap tersimpan.`,
+      )
+    ) {
+      return
+    }
+
+    setDeactivatingId(subject.id)
+    setFeedback(null)
+    try {
+      const result = await setSchoolSubjectActive(subject.id, false)
+      setFeedback(result)
+      if (result.status === 'success') router.refresh()
+    } finally {
+      setDeactivatingId(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -67,7 +91,7 @@ export default function SubjectManagement({
             Mata Pelajaran
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#65736a] dark:text-[#c5c2ba]">
-            Lihat mata pelajaran aktif dan tambahkan mata pelajaran baru.
+            Tambahkan mata pelajaran atau nonaktifkan yang tidak lagi digunakan.
           </p>
         </div>
       </header>
@@ -206,6 +230,15 @@ export default function SubjectManagement({
                       Kode: {subject.kode}
                     </span>
                   </span>
+                  <button
+                    aria-label={`Nonaktifkan ${subject.nama}`}
+                    className="grid size-9 shrink-0 place-items-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:text-red-300 dark:hover:bg-red-950/30"
+                    disabled={deactivatingId === subject.id}
+                    onClick={() => void handleDeactivate(subject)}
+                    type="button"
+                  >
+                    <Trash2 aria-hidden="true" size={17} />
+                  </button>
                 </li>
               ))}
             </ul>
